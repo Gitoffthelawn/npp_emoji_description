@@ -1,194 +1,309 @@
 # Publishing Emoji Description to Notepad++ Plugin Admin
 
-This guide will help you publish the Emoji Description plugin to the official Notepad++ Plugin Admin repository.
+This guide explains how to publish the Emoji Description plugin to the official Notepad++ Plugin Admin repository.
 
-## Prerequisites
+## Automated Release Process
 
-- GitHub account
-- Git installed
-- Plugin binaries built for both x86 and x64 architectures
-- Repository: https://github.com/Ruberoid/npp_emoji_description
+This project uses **GitHub Actions** to automatically create releases. No manual archive creation or file uploads needed!
 
-## Step 1: Create GitHub Repository
-
-1. Go to https://github.com/new
-2. Create repository: `npp_emoji_description`
-3. Set visibility to **Public**
-4. Don't initialize with README (we already have one)
-
-## Step 2: Push Code to GitHub
+### Quick Release (TL;DR)
 
 ```bash
-cd c:\work\github\npp_showchar\EmojiCodePlugin
-
-# Initialize git (if not already done)
-git init
-
-# Add all files
+# 1. Update version in src/EmojiDescription.rc
+# 2. Update CHANGELOG.md
+# 3. Commit changes
 git add .
+git commit -m "Bump version to 0.2.0"
+git push
 
-# Commit
-git commit -m "Initial release v0.1.0
+# 4. Create and push tag
+git tag -a v0.2.0 -m "Release version 0.2.0"
+git push origin v0.2.0
 
-- Display character encoding information in status bar
-- Support for all Unicode characters including emoji
-- Show Unicode code point, decimal, hex, HTML entity, UTF-8 bytes"
-
-# Add remote
-git remote add origin https://github.com/Ruberoid/npp_emoji_description.git
-
-# Push to GitHub
-git branch -M master
-git push -u origin master
+# Done! GitHub Actions will:
+# - Build binaries for x86, x64, and ARM64
+# - Create ZIP archives
+# - Create GitHub Release
+# - Attach all files
 ```
 
-## Step 3: Create Release with Binaries
+## Detailed Release Process
 
-1. Go to your repository: https://github.com/Ruberoid/npp_emoji_description
+### Step 1: Prepare the Release
 
-2. Click on "Releases" → "Create a new release"
+1. **Update version number** in `src/EmojiDescription.rc`:
+```cpp
+#define VERSION_VALUE "0.2.0\0"
+#define VERSION_DIGITALVALUE 0, 2, 0, 0
+```
 
-3. Set tag: `v0.1.0`
-
-4. Set title: `Emoji Description v0.1.0`
-
-5. Description:
+2. **Update CHANGELOG.md**:
 ```markdown
-## Emoji Description v0.1.0
+## [0.2.0] - 2026-01-XX
 
-First release of Emoji Description plugin for Notepad++.
+### Added
+- New feature description
 
-### Features
-- Displays detailed character encoding information in the status bar
-- Shows Unicode code point (U+XXXX)
-- Shows decimal and hexadecimal values
-- Shows HTML entity (&#XXXX;)
-- Shows UTF-8 byte sequence
-- Supports all Unicode characters including emoji
-
-### Installation
-Download the appropriate ZIP file for your Notepad++ version:
-- `EmojiDescription_x64_v0.1.0.zip` for 64-bit Notepad++
-- `EmojiDescription_x86_v0.1.0.zip` for 32-bit Notepad++
-
-Extract the DLL to `%APPDATA%\Notepad++\plugins\EmojiDescription\` and restart Notepad++.
+### Fixed
+- Bug fix description
 ```
 
-6. Attach binaries:
-   - Create `EmojiDescription_x64_v0.1.0.zip` containing `bin64\EmojiDescription.dll`
-   - Create `EmojiDescription_x86_v0.1.0.zip` containing `bin\EmojiDescription.dll`
+3. **Commit changes**:
+```bash
+git add src/EmojiDescription.rc CHANGELOG.md
+git commit -m "Bump version to 0.2.0"
+git push
+```
 
-## Step 4: Prepare Plugin List Entry
+### Step 2: Create Release Tag
 
-Create a JSON file with plugin information for submission:
+```bash
+# Create annotated tag
+git tag -a v0.2.0 -m "Release version 0.2.0
+
+- Feature 1
+- Feature 2
+- Bug fix 1"
+
+# Push tag to GitHub
+git push origin v0.2.0
+```
+
+### Step 3: Wait for Automation
+
+GitHub Actions will automatically (takes ~3-5 minutes):
+
+1. ✅ Build plugin for all platforms (x86, x64, ARM64)
+2. ✅ Create ZIP archives:
+   - `EmojiDescription_x64_v0.2.0.zip`
+   - `EmojiDescription_x86_v0.2.0.zip`
+   - `EmojiDescription_arm64_v0.2.0.zip`
+3. ✅ Create GitHub Release
+4. ✅ Attach ZIP files to release
+
+**Monitor progress**: https://github.com/Ruberoid/npp_emoji_description/actions
+
+**Check release**: https://github.com/Ruberoid/npp_emoji_description/releases
+
+### Step 4: Verify Release
+
+1. Go to [Releases page](https://github.com/Ruberoid/npp_emoji_description/releases)
+2. Verify the new release appears with all three ZIP files
+3. Download and test one of the archives
+
+## Publishing to Notepad++ Plugin List
+
+Once you have a stable release, you can submit the plugin to the official Notepad++ Plugin List.
+
+### Prerequisites
+
+- ✅ Stable release published on GitHub
+- ✅ GPL v2 compatible license
+- ✅ Public source code repository
+- ✅ Binaries hosted on GitHub Releases
+- ✅ Both x86 and x64 builds available
+
+### Submission Process
+
+#### 1. Generate Plugin GUID
+
+Generate a unique GUID for your plugin:
+
+**PowerShell**:
+```powershell
+[guid]::NewGuid()
+```
+
+**Online**: https://www.guidgenerator.com/
+
+Save this GUID - you'll use it for all versions.
+
+#### 2. Fork Plugin List Repository
+
+Fork the official repository:
+https://github.com/notepad-plus-plus/nppPluginList
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/nppPluginList.git
+cd nppPluginList
+
+# Create branch
+git checkout -b add-emoji-description
+```
+
+#### 3. Add Plugin Entry
+
+**Edit `src/pl.x64.json`**:
+
+Add your plugin entry (keep alphabetical order by `folder-name`):
 
 ```json
 {
     "folder-name": "EmojiDescription",
     "display-name": "Emoji Description",
     "version": "0.1.0",
-    "id": "UNIQUE_GUID_HERE",
+    "id": "YOUR-GUID-HERE",
     "repository": "https://github.com/Ruberoid/npp_emoji_description",
     "description": "Displays detailed character encoding information in the status bar. Shows Unicode code point, decimal/hexadecimal values, HTML entity, and UTF-8 byte sequence for any character including emoji.",
     "author": "Ruberoid",
     "homepage": "https://github.com/Ruberoid/npp_emoji_description",
-    "x64-download": "https://github.com/Ruberoid/npp_emoji_description/releases/download/v0.1.0/EmojiDescription_x64_v0.1.0.zip",
+    "x64-download": "https://github.com/Ruberoid/npp_emoji_description/releases/download/v0.1.0/EmojiDescription_x64_v0.1.0.zip"
+}
+```
+
+**Edit `src/pl.x86.json`**:
+
+Add the same entry with x86 download URL:
+
+```json
+{
+    "folder-name": "EmojiDescription",
+    "display-name": "Emoji Description",
+    "version": "0.1.0",
+    "id": "YOUR-GUID-HERE",
+    "repository": "https://github.com/Ruberoid/npp_emoji_description",
+    "description": "Displays detailed character encoding information in the status bar. Shows Unicode code point, decimal/hexadecimal values, HTML entity, and UTF-8 byte sequence for any character including emoji.",
+    "author": "Ruberoid",
+    "homepage": "https://github.com/Ruberoid/npp_emoji_description",
     "x86-download": "https://github.com/Ruberoid/npp_emoji_description/releases/download/v0.1.0/EmojiDescription_x86_v0.1.0.zip"
 }
 ```
 
-**Note:** Generate a GUID using PowerShell:
-```powershell
-[guid]::NewGuid()
-```
+#### 4. Validate JSON
 
-## Step 5: Submit to Plugin List
-
-1. Fork the official plugin list repository:
-   https://github.com/notepad-plus-plus/nppPluginList
-
-2. Clone your fork:
 ```bash
-git clone https://github.com/YOUR_USERNAME/nppPluginList.git
-cd nppPluginList
-```
-
-3. Create a new branch:
-```bash
-git checkout -b add-emoji-description
-```
-
-4. Add your plugin entry to `src/pl.x64.json` (for 64-bit):
-   - Add your JSON entry to the array
-   - Keep alphabetical order by `folder-name`
-
-5. Add your plugin entry to `src/pl.x86.json` (for 32-bit):
-   - Same JSON structure
-   - Update `x86-download` URL
-
-6. Validate JSON:
-```bash
-# Install Node.js if needed
+# Install dependencies (if needed)
 npm install
+
+# Validate JSON
 npm test
 ```
 
-7. Commit and push:
+Fix any validation errors before proceeding.
+
+#### 5. Submit Pull Request
+
 ```bash
+# Commit changes
 git add src/pl.x64.json src/pl.x86.json
 git commit -m "Add Emoji Description plugin v0.1.0"
+
+# Push to your fork
 git push origin add-emoji-description
 ```
 
-8. Create Pull Request:
-   - Go to your fork on GitHub
-   - Click "Pull Request"
-   - Title: `Add Emoji Description plugin v0.1.0`
-   - Description:
+**Create Pull Request** on GitHub with this template:
+
 ```markdown
 ## Plugin Information
-- **Name:** Emoji Description
-- **Version:** 0.1.0
-- **Author:** Ruberoid
-- **Repository:** https://github.com/Ruberoid/npp_emoji_description
+- **Name**: Emoji Description
+- **Version**: 0.1.0
+- **Author**: Ruberoid
+- **Repository**: https://github.com/Ruberoid/npp_emoji_description
 
 ## Description
-Displays detailed character encoding information in the status bar for any character under the cursor, including full emoji support.
+Displays detailed character encoding information in the status bar for any character under the cursor, with full emoji support.
+
+## Features
+- Unicode code point (U+XXXX)
+- Decimal and hexadecimal values
+- HTML entity format
+- UTF-8 byte sequence
+- Works with all Unicode characters including emoji
 
 ## Checklist
-- [x] Plugin binaries are hosted on GitHub Releases
+- [x] Plugin binaries hosted on GitHub Releases
 - [x] Both x86 and x64 versions provided
 - [x] JSON entries added to both pl.x64.json and pl.x86.json
 - [x] Plugin follows Notepad++ plugin guidelines
-- [x] Source code is publicly available
+- [x] Source code publicly available
 - [x] GPL v2 compatible license
+- [x] JSON validation passed (`npm test`)
 ```
 
-9. Wait for review from Notepad++ maintainers
+#### 6. Wait for Review
 
-## Step 6: Update for Future Releases
+Notepad++ maintainers will review your submission. They may:
+- Request changes
+- Ask questions
+- Test the plugin
+- Merge if everything is OK
 
-For version updates:
+**Review time**: Usually 1-7 days
 
-1. Build new binaries
-2. Create new GitHub release (e.g., v0.2.0)
-3. Update JSON entries in nppPluginList:
-   - Update `version` field
-   - Update download URLs
-4. Create PR with title: `Update Emoji Description to v0.2.0`
+## Updating Plugin Version
+
+When releasing a new version:
+
+### 1. Create New Release
+
+Follow [Step 1-3](#detailed-release-process) above to create a new release with updated version.
+
+### 2. Update Plugin List
+
+Fork/clone nppPluginList again (or pull latest changes):
+
+```bash
+cd nppPluginList
+git checkout main
+git pull upstream main
+git checkout -b update-emoji-description-v0.2.0
+```
+
+Update version and download URLs in both JSON files:
+
+```json
+{
+    "version": "0.2.0",
+    "x64-download": "https://github.com/Ruberoid/npp_emoji_description/releases/download/v0.2.0/EmojiDescription_x64_v0.2.0.zip"
+}
+```
+
+Submit PR with title: `Update Emoji Description to v0.2.0`
 
 ## Requirements for Acceptance
 
-- ✓ Plugin must be GPL v2 compatible
-- ✓ Source code must be publicly available
-- ✓ Binaries hosted on GitHub Releases
-- ✓ Both x86 and x64 builds (if applicable)
-- ✓ Plugin follows Notepad++ plugin interface
-- ✓ No malware or suspicious code
-- ✓ Clear description and documentation
+- ✅ GPL v2 or compatible license
+- ✅ Public source code
+- ✅ Binaries on GitHub Releases
+- ✅ Both x86 and x64 builds
+- ✅ Valid plugin interface implementation
+- ✅ No malware or suspicious code
+- ✅ Clear documentation
+- ✅ Stable release (not alpha/beta for first submission)
 
 ## Useful Links
 
-- Plugin List Repository: https://github.com/notepad-plus-plus/nppPluginList
-- Plugin Template: https://github.com/npp-plugins/plugintemplate
-- Plugin Development Guide: https://npp-user-manual.org/docs/plugin-communication/
+- **Plugin List Repo**: https://github.com/notepad-plus-plus/nppPluginList
+- **Plugin Template**: https://github.com/npp-plugins/plugintemplate
+- **Plugin Development**: https://npp-user-manual.org/docs/plugin-communication/
+- **Plugin List Guidelines**: https://github.com/notepad-plus-plus/nppPluginList#submission-guidelines
+
+## Troubleshooting
+
+### Release workflow failed?
+
+Check GitHub Actions logs:
+https://github.com/Ruberoid/npp_emoji_description/actions
+
+Common issues:
+- Missing permissions (add `permissions: contents: write`)
+- Build errors (check MSBuild logs)
+- Invalid tag format (must be `v*.*.*`)
+
+### JSON validation failed?
+
+```bash
+cd nppPluginList
+npm test
+```
+
+Fix syntax errors, missing commas, or invalid URLs.
+
+### Download links not working?
+
+Ensure:
+- Release is published (not draft)
+- ZIP files are attached to release
+- URLs match exactly: `https://github.com/Ruberoid/npp_emoji_description/releases/download/v0.1.0/EmojiDescription_x64_v0.1.0.zip`

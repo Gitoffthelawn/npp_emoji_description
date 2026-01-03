@@ -1,139 +1,180 @@
-# Emoji Description для Notepad++
+# Emoji Description for Notepad++
 
 **Version 0.1.0**
 
-Плагин для Notepad++, который автоматически показывает детальную информацию о кодировке символа под курсором в строке состояния (statusbar).
+A Notepad++ plugin that automatically displays detailed character encoding information in the status bar for the character under the cursor.
+
+[![CI Build](https://github.com/Ruberoid/npp_emoji_description/actions/workflows/CI_build.yml/badge.svg)](https://github.com/Ruberoid/npp_emoji_description/actions/workflows/CI_build.yml)
+[![Release](https://github.com/Ruberoid/npp_emoji_description/actions/workflows/release.yml/badge.svg)](https://github.com/Ruberoid/npp_emoji_description/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/Ruberoid/npp_emoji_description)](https://github.com/Ruberoid/npp_emoji_description/releases)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 GitHub: https://github.com/Ruberoid/npp_emoji_description
 
-## Возможности
+## Features
 
-При движении курсора по тексту плагин автоматически показывает для текущего символа:
-- **Unicode code point** (например: U+1F600)
-- **Decimal** (десятичное значение)
-- **Hexadecimal** (шестнадцатеричное значение)
-- **HTML entity** (для использования в HTML)
-- **UTF-8 byte sequence** (последовательность байтов в UTF-8)
+When you move the cursor through text, the plugin automatically displays for the current character:
+- **Unicode code point** (U+XXXX format)
+- **Decimal** value
+- **Hexadecimal** value
+- **HTML entity** (&#XXXX; format)
+- **UTF-8 byte sequence** (hex bytes)
 
-## Поддержка
+## Supported Characters
 
-- Все символы ASCII
-- Все символы Unicode (включая кириллицу, китайские иероглифы и т.д.)
-- Эмодзи и другие символы вне базовой многоязычной плоскости (BMP)
+- All ASCII characters
+- All Unicode characters (including Cyrillic, Chinese, etc.)
+- Emoji and other characters outside the Basic Multilingual Plane (BMP)
+- Full support for multi-byte UTF-8 sequences
 
-## Примеры вывода
+## Output Examples
 
-Для символа `A`:
+For character `A`:
 ```
 U+0041 | Dec: 65 | Hex: 0x41 | HTML: &#65; | UTF-8: 0x41
 ```
 
-Для эмодзи `😀`:
+For emoji `😀`:
 ```
 U+1F600 | Dec: 128512 | Hex: 0x1F600 | HTML: &#128512; | UTF-8: 0xF0 0x9F 0x98 0x80
 ```
 
-Для кириллического символа `Я`:
+For Cyrillic character `Я`:
 ```
 U+042F | Dec: 1071 | Hex: 0x42F | HTML: &#1071; | UTF-8: 0xD0 0xAF
 ```
 
-## Сборка
+## Installation
 
-### Требования
-- Visual Studio 2017 или выше с компонентом "Разработка классических приложений на C++"
+### Option 1: From Release (Recommended)
+
+1. Download the latest release from [Releases page](https://github.com/Ruberoid/npp_emoji_description/releases)
+2. Choose the appropriate ZIP file for your Notepad++ version:
+   - `EmojiDescription_x64_*.zip` for 64-bit Notepad++
+   - `EmojiDescription_x86_*.zip` for 32-bit Notepad++
+   - `EmojiDescription_arm64_*.zip` for ARM64 Notepad++
+3. Extract the DLL file
+4. Copy to `%APPDATA%\Notepad++\plugins\EmojiDescription\`
+5. Restart Notepad++
+
+### Option 2: Build from Source
+
+See [Building from Source](#building-from-source) section below.
+
+## Usage
+
+After installation, the plugin starts working automatically. Access plugin commands via `Plugins → Emoji Description`:
+
+- **Show Character Info** - Toggle display on/off (enabled by default)
+- **About** - Plugin information
+
+Simply move the cursor through text, and character information will be displayed in the status bar at the bottom of the Notepad++ window.
+
+## Building from Source
+
+### Requirements
+- Visual Studio 2017 or later with "Desktop development with C++" workload
 - Windows SDK
-- (Опционально) CMake 3.15 или выше для сборки через CMake
+- (Optional) CMake 3.15 or later for CMake-based builds
 
-### Вариант 1: Сборка через Visual Studio (рекомендуется)
+### Build Option 1: Visual Studio (Recommended)
 
-1. Откройте файл `vs.proj\EmojiDescription.vcxproj` в Visual Studio
-2. Выберите конфигурацию `Release` и платформу `x64` (или `Win32` для 32-битной версии)
-3. В меню выберите `Build → Build Solution` (или нажмите `Ctrl+Shift+B`)
-4. Скомпилированный файл `EmojiDescription.dll` будет в папке `bin64\` (или `bin\` для x86)
+1. Open `vs.proj\EmojiDescription.vcxproj` in Visual Studio
+2. Select `Release` configuration and `x64` platform (or `Win32` for 32-bit)
+3. Build → Build Solution (or press `Ctrl+Shift+B`)
+4. Compiled DLL will be in `bin64\` (or `bin\` for x86)
 
-### Вариант 2: Сборка через MSBuild из Developer Command Prompt
+### Build Option 2: MSBuild from Developer Command Prompt
 
-1. Откройте "Developer Command Prompt for VS 2022" (или соответствующую версию VS)
-2. Перейдите в папку проекта:
+1. Open "Developer Command Prompt for VS 2022" (or your VS version)
+2. Navigate to project folder:
 ```bash
-cd <путь_к_проекту>
+cd <path_to_project>
 ```
-3. Выполните сборку:
+3. Build:
 ```bash
 msbuild vs.proj\EmojiDescription.vcxproj /p:Configuration=Release /p:Platform=x64
 ```
 
-### Вариант 3: Сборка через CMake
+### Build Option 3: CMake
 
-1. Создайте директорию для сборки:
+1. Create build directory:
 ```bash
 mkdir build
 cd build
 ```
 
-2. Откройте "Developer Command Prompt for VS 2022"
-3. Сгенерируйте проект:
+2. Open "Developer Command Prompt for VS 2022"
+3. Generate project:
 ```bash
 cmake ..
 ```
 
-4. Соберите проект:
+4. Build:
 ```bash
 cmake --build . --config Release
 ```
 
-### Установка
-
-После успешной сборки DLL файл будет находиться:
-- При сборке через Visual Studio: `bin64\EmojiDescription.dll` (x64) или `bin\EmojiDescription.dll` (x86)
-- При сборке через CMake: `build\bin\Release\EmojiDescription.dll`
-
-Скопируйте `EmojiDescription.dll` в папку плагинов Notepad++:
-- Для установки для всех пользователей: `C:\Program Files\Notepad++\plugins\EmojiDescription\`
-- Для установки только для текущего пользователя: `%APPDATA%\Notepad++\plugins\EmojiDescription\`
-
-**Важно:** Создайте подпапку с именем плагина и поместите DLL внутрь неё.
-
-Перезапустите Notepad++.
-
-## Использование
-
-После установки плагин автоматически начнёт работать. В меню `Плагины → Emoji Description` доступны следующие команды:
-
-- **Show Character Info** - включить/выключить отображение информации о символе (по умолчанию включено)
-- **About** - информация о плагине
-
-Просто перемещайте курсор по тексту, и информация о символе под курсором будет отображаться в строке состояния внизу окна Notepad++.
-
-## Лицензия
-
-Плагин распространяется под лицензией GPL v2, как и сам Notepad++.
-
-## Разработка
+## Development
 
 Repository: https://github.com/Ruberoid/npp_emoji_description
 
-Структура проекта:
+### Project Structure
 ```
 EmojiDescription/
 ├── src/
-│   ├── PluginDefinition.h       - Заголовочный файл с объявлениями
-│   ├── PluginDefinition.cpp     - Основная логика плагина
-│   ├── EmojiDescription.cpp     - Точка входа DLL
-│   ├── EmojiDescription.rc      - Ресурсы (версия, описание)
-│   ├── PluginInterface.h        - Интерфейс плагина Notepad++
-│   ├── Scintilla.h              - API Scintilla
+│   ├── PluginDefinition.h       - Header with declarations
+│   ├── PluginDefinition.cpp     - Main plugin logic
+│   ├── EmojiDescription.cpp     - DLL entry point
+│   ├── EmojiDescription.rc      - Resources (version, description)
+│   ├── PluginInterface.h        - Notepad++ plugin interface
+│   ├── Scintilla.h              - Scintilla API
 │   └── ...
 ├── vs.proj/
-│   └── EmojiDescription.vcxproj - Проект Visual Studio
-├── CMakeLists.txt               - Конфигурация CMake
-└── README.md                    - Этот файл
+│   └── EmojiDescription.vcxproj - Visual Studio project
+├── .github/workflows/
+│   ├── CI_build.yml             - CI for builds
+│   └── release.yml              - Automated releases
+├── CMakeLists.txt               - CMake configuration
+└── README.md                    - This file
 ```
 
-### Основные функции
+### Key Functions
 
-- `updateCharacterInfo()` - обновляет информацию о символе под курсором
-- `decodeUtf8Char()` - декодирует UTF-8 символ в Unicode code point
-- `formatCharacterCodes()` - форматирует вывод всех представлений символа
-- `pluginBeNotified()` - обрабатывает уведомления от Notepad++ и Scintilla
+- `updateCharacterInfo()` - Updates character info under cursor (src/PluginDefinition.cpp:194)
+- `decodeUtf8Char()` - Decodes UTF-8 character to Unicode code point (src/PluginDefinition.cpp:91)
+- `formatCharacterCodes()` - Formats all code representations (src/PluginDefinition.cpp:136)
+- `pluginBeNotified()` - Handles notifications from Notepad++ and Scintilla (src/PluginDefinition.cpp:243)
+
+## CI/CD
+
+The project uses GitHub Actions for automated builds and releases:
+
+- **CI Build**: Runs on every commit to verify compilation for all platforms
+- **Release**: Automatically creates releases with binaries when a version tag is pushed
+
+See [PUBLISHING.md](PUBLISHING.md) for details on creating releases.
+
+## License
+
+This plugin is distributed under the GPL v2 license, same as Notepad++.
+
+See [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+If you encounter any issues or have suggestions, please [open an issue](https://github.com/Ruberoid/npp_emoji_description/issues) on GitHub.
+
+## Author
+
+**Ruberoid**
+- GitHub: [@Ruberoid](https://github.com/Ruberoid)
+- Repository: https://github.com/Ruberoid/npp_emoji_description
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and changes.

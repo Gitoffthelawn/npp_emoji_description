@@ -1,83 +1,124 @@
-# Установка компонентов C++ для Visual Studio 2022
+# Setting Up Visual Studio C++ Components for Building
 
-## Автоматическая установка (рекомендуется)
+This guide helps you install the necessary C++ components for Visual Studio 2022 to build the Emoji Description plugin.
 
-Откройте PowerShell от имени администратора и выполните:
+## Automatic Installation (Recommended)
+
+Open **PowerShell as Administrator** and run:
 
 ```powershell
-& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath "C:\Program Files\Microsoft Visual Studio\2022\Community" --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.22000 --quiet --norestart
+& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath "C:\Program Files\Microsoft Visual Studio\2022\Community" --add Microsoft.VisualStudio.Workload.NativeDesktop --quiet --norestart
 ```
 
-Эта команда установит:
-- Рабочую нагрузку "Разработка классических приложений на C++"
-- Инструменты сборки MSVC v143
-- Windows 11 SDK
+This command will install:
+- "Desktop development with C++" workload
+- MSVC v143 build tools
+- Windows SDK
 
-## Ручная установка через GUI
+## Manual Installation via GUI
 
-1. Закройте Visual Studio (если открыта)
+1. Close Visual Studio (if open)
 
-2. Запустите Visual Studio Installer:
-   - Нажмите Win + S
-   - Введите "Visual Studio Installer"
-   - Запустите приложение
+2. Launch Visual Studio Installer:
+   - Press Win + S
+   - Type "Visual Studio Installer"
+   - Run the application
 
-3. В Visual Studio Installer:
-   - Найдите "Visual Studio Community 2022"
-   - Нажмите кнопку **"Изменить"** (Modify)
+3. In Visual Studio Installer:
+   - Find "Visual Studio Community 2022"
+   - Click the **"Modify"** button
 
-4. В списке рабочих нагрузок:
-   - Отметьте галочкой **"Разработка классических приложений на C++"** (Desktop development with C++)
+4. In the workloads list:
+   - Check **"Desktop development with C++"**
 
-5. Справа в разделе "Сведения об установке" убедитесь, что выбраны:
-   - ✓ MSVC v143 - средства сборки C++ для VS 2022 (последняя версия)
-   - ✓ Windows SDK (любая версия 10.0.x или 11.0.x)
+5. On the right side in "Installation details", ensure these are selected:
+   - ✓ MSVC v143 - VS 2022 C++ build tools (latest version)
+   - ✓ Windows SDK (any 10.0.x or 11.0.x version)
    - ✓ C++ CMake tools for Windows
 
-6. Нажмите кнопку **"Изменить"** внизу справа
+6. Click the **"Modify"** button at the bottom right
 
-7. Дождитесь завершения установки (может занять 5-15 минут)
+7. Wait for installation to complete (may take 5-15 minutes)
 
-## Проверка установки
+## Verify Installation
 
-После установки откройте "Developer Command Prompt for VS 2022" и выполните:
+After installation, open "Developer Command Prompt for VS 2022" and run:
 
 ```bash
 cl
 ```
 
-Должно вывести информацию о компиляторе Microsoft C/C++, например:
+Should output information about the Microsoft C/C++ compiler, for example:
 ```
 Microsoft (R) C/C++ Optimizing Compiler Version 19.xx.xxxxx for x64
 ```
 
-## После установки компонентов
+## After Installing Components
 
-1. Вернитесь в папку проекта:
+1. Return to the project folder:
 ```bash
-cd c:\work\github\npp_showchar\EmojiCodePlugin
+cd <path_to_project>
 ```
 
-2. Откройте проект в Visual Studio:
+2. Open the project in Visual Studio:
 ```bash
-start vs.proj\NppPluginTemplate.vcxproj
+start vs.proj\EmojiDescription.vcxproj
 ```
 
-3. Или соберите из командной строки:
-   - Откройте "Developer Command Prompt for VS 2022"
-   - Выполните:
+3. Or build from command line:
+   - Open "Developer Command Prompt for VS 2022"
+   - Run:
    ```bash
-   cd c:\work\github\npp_showchar\EmojiCodePlugin
-   msbuild vs.proj\NppPluginTemplate.vcxproj /p:Configuration=Release /p:Platform=x64
+   cd <path_to_project>
+   msbuild vs.proj\EmojiDescription.vcxproj /p:Configuration=Release /p:Platform=x64
    ```
 
-## Альтернатива: Использование Build Tools
+## Alternative: Using Build Tools Only
 
-Если вы не хотите устанавливать полную Visual Studio, можете установить только Build Tools:
+If you don't want to install the full Visual Studio, you can install only Build Tools:
 
-1. Скачайте: https://aka.ms/vs/17/release/vs_BuildTools.exe
-2. Запустите установщик
-3. Выберите "Средства сборки C++"
-4. Установите
+1. Download: https://aka.ms/vs/17/release/vs_BuildTools.exe
+2. Run the installer
+3. Select "C++ build tools"
+4. Install
 
-Затем используйте "Developer Command Prompt for VS 2022" для сборки проекта.
+Then use "Developer Command Prompt for VS 2022" to build the project.
+
+## Troubleshooting
+
+### "cl is not recognized as an internal or external command"
+
+You're not in a Developer Command Prompt. Either:
+- Use "Developer Command Prompt for VS 2022" from Start Menu
+- Or run from PowerShell:
+  ```powershell
+  & "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1"
+  ```
+
+### "Cannot find vcvarsall.bat"
+
+C++ components are not installed. Follow the installation steps above.
+
+### MSBuild errors about missing props files
+
+Visual Studio installation is incomplete. Try:
+1. Open Visual Studio Installer
+2. Click "Modify"
+3. Ensure "Desktop development with C++" is checked
+4. Click "Modify" again
+5. Wait for installation to complete
+
+## Required Components Summary
+
+- **Visual Studio 2022** (Community, Professional, or Enterprise)
+  - OR **Build Tools for Visual Studio 2022**
+- **Workload**: Desktop development with C++
+  - MSVC v143 compiler
+  - Windows SDK (10 or 11)
+  - C++ CMake tools (optional, for CMake builds)
+
+## Useful Links
+
+- Visual Studio Downloads: https://visualstudio.microsoft.com/downloads/
+- Build Tools: https://aka.ms/vs/17/release/vs_BuildTools.exe
+- VS Documentation: https://docs.microsoft.com/en-us/visualstudio/
