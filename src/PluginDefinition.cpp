@@ -448,13 +448,15 @@ void toggleFieldUtf8()      { toggleField(g_fields.utf8,      6); }
 void aboutDialog()
 {
     ::MessageBox(NULL,
-        TEXT("Emoji Description v0.1.0\n\n")
+        TEXT("Emoji Description v0.2.14\n\n")
         TEXT("Displays detailed character encoding information in the status bar.\n\n")
         TEXT("Shows for any character:\n")
         TEXT("- Unicode code point (U+XXXX)\n")
+        TEXT("- Unicode character name (e.g. EM DASH)\n")
         TEXT("- Decimal and Hexadecimal values\n")
         TEXT("- HTML entity (&#XXXX;)\n")
         TEXT("- UTF-8 byte sequence\n\n")
+        TEXT("Each field can be toggled from the Plugins menu.\n")
         TEXT("Supports all Unicode characters including emoji!\n\n")
         TEXT("https://github.com/Ruberoid/npp_emoji_description"),
         TEXT("About Emoji Description"),

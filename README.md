@@ -1,6 +1,6 @@
 # Emoji Description for Notepad++
 
-**Version 0.1.0**
+**Version 0.2.14**
 
 A Notepad++ plugin that automatically displays detailed character encoding information in the status bar for the character under the cursor.
 
