@@ -1,6 +1,6 @@
 # Emoji Description for Notepad++
 
-**Version 0.2.14**
+**Version 0.3.15**
 
 A Notepad++ plugin that automatically displays detailed character encoding information in the status bar for the character under the cursor.
 
@@ -15,7 +15,7 @@ GitHub: https://github.com/Ruberoid/npp_emoji_description
 
 When you move the cursor through text, the plugin automatically displays for the current character:
 - **Unicode code point** (U+XXXX format)
-- **Unicode character name** (e.g. `EM DASH`, `NO-BREAK SPACE`) — handy for telling look-alike characters apart; off by default
+- **Unicode character name** (e.g. `EM DASH`, `NO-BREAK SPACE`, `GRINNING FACE`) — handy for telling look-alike characters apart; covers the entire Unicode code space including emoji; off by default
 - **Decimal** value
 - **Hexadecimal** value
 - **HTML entity** (&#XXXX; format)

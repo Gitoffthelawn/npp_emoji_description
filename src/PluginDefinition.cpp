@@ -17,6 +17,7 @@
 
 #include "PluginDefinition.h"
 #include "menuCmdID.h"
+#include "UnicodeNames.h"
 #include <windows.h>
 #include <tchar.h>
 #include <shlwapi.h>
@@ -39,9 +40,12 @@ NppData nppData;
 //
 static bool g_showCharInfo = true;
 
-// Which fields are shown. Defaults match the original behavior except for the
-// character name, which is opt-in (it depends on an OS lookup that may be absent).
-static DisplayFields g_fields = { true, false, true, true, true, true };
+// Which fields are shown by default: code point, character name and HTML entity;
+// decimal, hex and the UTF-8 byte sequence are off. The character name is now
+// served from the embedded Unicode table (see UnicodeNames.cpp), so it is always
+// available and shown by default.
+// Order: { codePoint, name, decimal, hex, html, utf8 }.
+static DisplayFields g_fields = { true, true, false, false, true, false };
 
 // Full path to the plugin .ini, resolved once from the Notepad++ config dir.
 static TCHAR g_iniPath[MAX_PATH] = { 0 };
@@ -61,6 +65,9 @@ void pluginCleanUp()
 }
 
 //
+// Insert a plugin-menu separator (defined below).
+static bool setSeparator(size_t index);
+
 // Initialization of your plugin commands
 // You should fill your plugins commands here
 void commandMenuInit()
@@ -69,13 +76,14 @@ void commandMenuInit()
     loadConfig();
 
     setCommand(0, TEXT("Show Character Info"),    toggleShowCharInfo,   NULL, g_showCharInfo);
-    setCommand(1, TEXT("Show: Code Point (U+)"),  toggleFieldCodePoint, NULL, g_fields.codePoint);
-    setCommand(2, TEXT("Show: Character Name"),   toggleFieldName,      NULL, g_fields.name);
-    setCommand(3, TEXT("Show: Decimal"),          toggleFieldDecimal,   NULL, g_fields.decimal);
-    setCommand(4, TEXT("Show: Hexadecimal"),      toggleFieldHex,       NULL, g_fields.hex);
-    setCommand(5, TEXT("Show: HTML Entity"),      toggleFieldHtml,      NULL, g_fields.html);
-    setCommand(6, TEXT("Show: UTF-8 Bytes"),      toggleFieldUtf8,      NULL, g_fields.utf8);
-    setCommand(7, TEXT("About"),                  aboutDialog,          NULL, false);
+    setSeparator(1);  // divide the master on/off toggle from the per-field options
+    setCommand(2, TEXT("Show: Code Point (U+)"),  toggleFieldCodePoint, NULL, g_fields.codePoint);
+    setCommand(3, TEXT("Show: Character Name"),   toggleFieldName,      NULL, g_fields.name);
+    setCommand(4, TEXT("Show: Decimal"),          toggleFieldDecimal,   NULL, g_fields.decimal);
+    setCommand(5, TEXT("Show: Hexadecimal"),      toggleFieldHex,       NULL, g_fields.hex);
+    setCommand(6, TEXT("Show: HTML Entity"),      toggleFieldHtml,      NULL, g_fields.html);
+    setCommand(7, TEXT("Show: UTF-8 Bytes"),      toggleFieldUtf8,      NULL, g_fields.utf8);
+    setCommand(8, TEXT("About"),                  aboutDialog,          NULL, false);
 }
 
 //
@@ -97,11 +105,11 @@ void loadConfig()
     initConfigPath();
     g_showCharInfo     = ::GetPrivateProfileInt(TEXT("Display"), TEXT("Enabled"),   1, g_iniPath) != 0;
     g_fields.codePoint = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("CodePoint"), 1, g_iniPath) != 0;
-    g_fields.name      = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Name"),      0, g_iniPath) != 0;
-    g_fields.decimal   = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Decimal"),   1, g_iniPath) != 0;
-    g_fields.hex       = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Hex"),       1, g_iniPath) != 0;
+    g_fields.name      = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Name"),      1, g_iniPath) != 0;
+    g_fields.decimal   = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Decimal"),   0, g_iniPath) != 0;
+    g_fields.hex       = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Hex"),       0, g_iniPath) != 0;
     g_fields.html      = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Html"),      1, g_iniPath) != 0;
-    g_fields.utf8      = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Utf8"),      1, g_iniPath) != 0;
+    g_fields.utf8      = ::GetPrivateProfileInt(TEXT("Fields"),  TEXT("Utf8"),      0, g_iniPath) != 0;
 }
 
 //
@@ -143,6 +151,23 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
     funcItem[index]._pFunc = pFunc;
     funcItem[index]._init2Check = check0nInit;
     funcItem[index]._pShKey = sk;
+
+    return true;
+}
+
+//
+// Insert a separator line in the plugin menu at the given index. Notepad++
+// renders a FuncItem with a NULL function pointer as a menu separator.
+//
+static bool setSeparator(size_t index)
+{
+    if (index >= nbFunc)
+        return false;
+
+    funcItem[index]._itemName[0] = TEXT('\0');
+    funcItem[index]._pFunc = NULL;
+    funcItem[index]._init2Check = false;
+    funcItem[index]._pShKey = NULL;
 
     return true;
 }
@@ -193,37 +218,15 @@ uint32_t decodeUtf8Char(const unsigned char* text, int& bytesRead)
 }
 
 //
-// Look up the Unicode character name (e.g. "EM DASH") for a code point.
-//
-// Uses GetUName from the system getuname.dll, the same lookup the Windows
-// Character Map (charmap.exe) relies on. The DLL is loaded lazily and the
-// function pointer cached. GetUName only covers the Basic Multilingual Plane
-// (its argument is a 16-bit WORD), so names are unavailable for code points
-// above U+FFFF (including most emoji). Returns false when no name is available.
+// Look up the Unicode character name (e.g. "EM DASH", "GRINNING FACE") for a
+// code point. Backed by the name table embedded in the DLL (see UnicodeNames.h
+// / UnicodeNames.cpp), so it covers the entire Unicode code space -- including
+// supplementary planes and emoji -- with no dependency on the OS. Returns false
+// when the code point has no formal Unicode name.
 //
 bool getUnicodeName(uint32_t codepoint, TCHAR* output, size_t outputSize)
 {
-    typedef int (WINAPI *GetUNameFunc)(WORD wCharCode, LPWSTR lpBuf);
-    static GetUNameFunc pGetUName = nullptr;
-    static bool resolved = false;
-
-    if (!resolved) {
-        resolved = true;
-        HMODULE hMod = ::LoadLibrary(TEXT("getuname.dll"));
-        if (hMod)
-            pGetUName = reinterpret_cast<GetUNameFunc>(::GetProcAddress(hMod, "GetUName"));
-    }
-
-    if (!pGetUName || codepoint > 0xFFFF)
-        return false;
-
-    WCHAR nameBuf[256] = { 0 };
-    int len = pGetUName(static_cast<WORD>(codepoint), nameBuf);
-    if (len <= 0 || nameBuf[0] == L'\0')
-        return false;
-
-    _tcsncpy_s(output, outputSize, nameBuf, _TRUNCATE);
-    return true;
+    return lookupUnicodeName(codepoint, output, outputSize);
 }
 
 //
@@ -438,17 +441,19 @@ static void toggleField(bool& flag, int menuIndex)
         updateCharacterInfo();
 }
 
-void toggleFieldCodePoint() { toggleField(g_fields.codePoint, 1); }
-void toggleFieldName()      { toggleField(g_fields.name,      2); }
-void toggleFieldDecimal()   { toggleField(g_fields.decimal,   3); }
-void toggleFieldHex()       { toggleField(g_fields.hex,       4); }
-void toggleFieldHtml()      { toggleField(g_fields.html,      5); }
-void toggleFieldUtf8()      { toggleField(g_fields.utf8,      6); }
+// menuIndex values match the setCommand() indices in commandMenuInit(), which
+// are offset by the separator at index 1.
+void toggleFieldCodePoint() { toggleField(g_fields.codePoint, 2); }
+void toggleFieldName()      { toggleField(g_fields.name,      3); }
+void toggleFieldDecimal()   { toggleField(g_fields.decimal,   4); }
+void toggleFieldHex()       { toggleField(g_fields.hex,       5); }
+void toggleFieldHtml()      { toggleField(g_fields.html,      6); }
+void toggleFieldUtf8()      { toggleField(g_fields.utf8,      7); }
 
 void aboutDialog()
 {
     ::MessageBox(NULL,
-        TEXT("Emoji Description v0.2.14\n\n")
+        TEXT("Emoji Description v0.3.15\n\n")
         TEXT("Displays detailed character encoding information in the status bar.\n\n")
         TEXT("Shows for any character:\n")
         TEXT("- Unicode code point (U+XXXX)\n")

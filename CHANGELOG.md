@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.15] - 2026-06-22
+
+### Changed
+- The Unicode character name now covers the **entire** Unicode code space —
+  supplementary planes, emoji, CJK / Tangut ideographs and Hangul syllables
+  included — instead of only the Basic Multilingual Plane. Names are served from
+  a table embedded in the plugin (generated from the pinned Unicode Character
+  Database by `tools/unicode_names/gen_names.py`), so the lookup no longer
+  depends on the system `getuname.dll` and behaves identically on every Windows
+  version and architecture. Adds roughly 640 KB to the DLL.
+- New default fields: code point, character name and HTML entity are shown out
+  of the box; decimal, hexadecimal and the UTF-8 byte sequence are off by
+  default. The character name is no longer opt-in now that it always resolves.
+- The plugin menu now separates the master "Show Character Info" toggle from the
+  per-field options with a divider.
+
 ## [0.2.14] - 2026-06-21
 
 ### Added
@@ -47,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Uses Scintilla API for text editor integration
 - GPL v2 licensed
 
-[Unreleased]: https://github.com/Ruberoid/npp_emoji_description/compare/v0.2.14...HEAD
+[Unreleased]: https://github.com/Ruberoid/npp_emoji_description/compare/v0.3.15...HEAD
+[0.3.15]: https://github.com/Ruberoid/npp_emoji_description/compare/v0.2.14...v0.3.15
 [0.2.14]: https://github.com/Ruberoid/npp_emoji_description/compare/v0.1.0...v0.2.14
 [0.1.0]: https://github.com/Ruberoid/npp_emoji_description/releases/tag/v0.1.0
